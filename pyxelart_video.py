@@ -133,10 +133,23 @@ def parse_aspect_ratio(aspect_str):
         
         raise ValueError(f"Formato de relación de aspecto no reconocido: {aspect_str}")
 
+def get_ffmpeg_codec(output_format):
+    """Devuelve los parámetros de codec para FFmpeg según el formato de salida"""
+    # Mapeo de extensiones a codecs para FFmpeg
+    format_codecs = {
+        '.mp4': 'libx264',
+        '.avi': 'libxvid',
+        '.mov': 'libx264',
+        '.mkv': 'libx264',
+    }
+    
+    return format_codecs.get(output_format.lower(), 'libx264')
+
 def video_to_retro_video(input_path, output_path=None, width=None, height=None, 
                           color_depth=16, pixel_size=4, frame_skip=1, fps=None, 
                           add_dialog=False, dialog_text="", output_format='.mp4',
-                          aspect_ratio=None, aspect_method='resize'):
+                          aspect_ratio=None, aspect_method='resize',
+                          quality=23, preset='medium'):
     """Convierte un video a otro video con efecto retro conservando el audio"""
     # Verificar que FFmpeg está instalado
     if not check_ffmpeg():
@@ -212,7 +225,8 @@ def video_to_retro_video(input_path, output_path=None, width=None, height=None,
         print(f"  Relación de aspecto: {aspect_ratio:.2f} (método: {aspect_method})")
     
     if preserve_audio:
-        print("  Audio: Se preservará el audio original")
+        print(f"  Audio: Se preservará el audio original")
+        print(f"  Calidad de compresión: {quality} (menor es mejor), preset: {preset}")
     else:
         print("  Audio: No se preservará (FFmpeg no disponible)")
     
@@ -256,16 +270,22 @@ def video_to_retro_video(input_path, output_path=None, width=None, height=None,
     if preserve_audio:
         print(f"Combinando video procesado con audio original...")
         
-        # Comando FFmpeg: copiar el audio del original y el video del procesado
+        # Obtener el codec apropiado para el formato
+        ffmpeg_codec = get_ffmpeg_codec(output_ext)
+        
+        # Comando FFmpeg: usar el audio del original y comprimir el video con la calidad especificada
         ffmpeg_cmd = [
             'ffmpeg', '-y',
             '-i', temp_video,
             '-i', input_path,
-            '-c:v', 'copy',          # Copiar el video sin recodificar
-            '-c:a', 'aac',           # Codificar el audio como AAC (compatible con la mayoría de formatos)
-            '-map', '0:v:0',         # Usar el video del primer input (temp_video)
-            '-map', '1:a:0',         # Usar el audio del segundo input (original)
-            '-shortest',             # Terminar cuando la pista más corta termine
+            '-c:v', ffmpeg_codec,       # Usar codec específico para el formato
+            '-crf', str(quality),       # Factor de calidad constante (menor = mejor calidad)
+            '-preset', preset,          # Preset de codificación (afecta velocidad de compresión y tamaño)
+            '-c:a', 'aac',              # Codec de audio
+            '-b:a', '128k',             # Bitrate de audio
+            '-map', '0:v:0',            # Usar el video del primer input (temp_video)
+            '-map', '1:a:0',            # Usar el audio del segundo input (original)
+            '-shortest',                # Terminar cuando la pista más corta termine
             output_path
         ]
         
@@ -295,7 +315,8 @@ def video_to_retro_video(input_path, output_path=None, width=None, height=None,
 def process_video_directory(input_dir, output_dir=None, width=None, height=None, 
                            color_depth=16, pixel_size=4, frame_skip=1, fps=None, 
                            add_dialog=False, dialog_text="", output_format='.mp4',
-                           aspect_ratio=None, aspect_method='resize'):
+                           aspect_ratio=None, aspect_method='resize',
+                           quality=23, preset='medium'):
     """
     Procesa todos los videos en un directorio
     """
@@ -308,7 +329,7 @@ def process_video_directory(input_dir, output_dir=None, width=None, height=None,
     if output_dir:
         output_path = Path(output_dir)
     else:
-        output_path = input_path / "retro"
+        output_path = input_path.parent / "retro"
     
     output_path.mkdir(exist_ok=True)
     
@@ -337,7 +358,7 @@ def process_video_directory(input_dir, output_dir=None, width=None, height=None,
             str(file_path), str(output_file), width, height, 
             color_depth, pixel_size, frame_skip, fps, 
             add_dialog, dialog_text, output_format,
-            aspect_ratio, aspect_method
+            aspect_ratio, aspect_method, quality, preset
         )
     
     print(f"\nProceso completo: {len(videos)} videos convertidos")
@@ -367,6 +388,10 @@ if __name__ == '__main__':
                                help='Relación de aspecto del video de salida')
     parser_single.add_argument('--aspect-method', choices=['resize', 'crop'], default='resize',
                                help='Método para ajustar la relación de aspecto')
+    parser_single.add_argument('--quality', type=int, default=23, help='Calidad de compresión (1-51, menor es mejor)')
+    parser_single.add_argument('--preset', choices=['ultrafast', 'superfast', 'veryfast', 'faster', 
+                                                   'fast', 'medium', 'slow', 'slower', 'veryslow'], 
+                               default='medium', help='Preset de codificación (afecta velocidad/tamaño)')
     
     # Subparser para procesamiento por lotes
     parser_batch = subparsers.add_parser('batch', help='Procesar múltiples videos en un directorio')
@@ -386,6 +411,10 @@ if __name__ == '__main__':
                              help='Relación de aspecto de los videos de salida')
     parser_batch.add_argument('--aspect-method', choices=['resize', 'crop'], default='resize',
                              help='Método para ajustar la relación de aspecto')
+    parser_batch.add_argument('--quality', type=int, default=23, help='Calidad de compresión (1-51, menor es mejor)')
+    parser_batch.add_argument('--preset', choices=['ultrafast', 'superfast', 'veryfast', 'faster', 
+                                                 'fast', 'medium', 'slow', 'slower', 'veryslow'], 
+                             default='medium', help='Preset de codificación (afecta velocidad/tamaño)')
     
     args = parser.parse_args()
     
@@ -400,14 +429,16 @@ if __name__ == '__main__':
                 args.input, args.output, args.width, args.height, 
                 args.colors, args.pixel_size, args.frame_skip, args.fps,
                 args.dialog, args.text, args.format,
-                aspect_ratio_value, args.aspect_method
+                aspect_ratio_value, args.aspect_method,
+                args.quality, args.preset
             )
         elif args.mode == 'batch':
             process_video_directory(
                 args.input_dir, args.output_dir, args.width, args.height,
                 args.colors, args.pixel_size, args.frame_skip, args.fps,
                 args.dialog, args.text, args.format,
-                aspect_ratio_value, args.aspect_method
+                aspect_ratio_value, args.aspect_method,
+                args.quality, args.preset
             )
         else:
             parser.print_help()
