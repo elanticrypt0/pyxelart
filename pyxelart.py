@@ -67,9 +67,22 @@ def parse_aspect_ratio(aspect_str):
 
 def retro_effect(input_path, output_path=None, width=None, height=None, color_depth=16, 
                  pixel_size=4, add_dialog=False, dialog_text="", 
-                 aspect_ratio=None, aspect_method='resize'):
+                 aspect_ratio=None, aspect_method='resize', quality=95):
     """
     Aplica un efecto retro a una imagen individual
+    
+    Args:
+        input_path: Ruta de la imagen de entrada
+        output_path: Ruta de la imagen de salida (opcional)
+        width: Ancho de salida (opcional)
+        height: Alto de salida (opcional)
+        color_depth: Número de colores (por defecto: 16)
+        pixel_size: Tamaño de pixelado (por defecto: 4)
+        add_dialog: Añadir cuadro de diálogo (por defecto: False)
+        dialog_text: Texto para el cuadro de diálogo (por defecto: "")
+        aspect_ratio: Relación de aspecto de salida (por defecto: None)
+        aspect_method: Método para ajustar relación de aspecto ('resize' o 'crop')
+        quality: Calidad de la imagen para formatos con compresión (1-100, por defecto: 95)
     """
     # Configuración de salida por defecto si no se especifica
     if not output_path:
@@ -79,6 +92,9 @@ def retro_effect(input_path, output_path=None, width=None, height=None, color_de
     # Cargar imagen
     img = Image.open(input_path)
     
+    # Detectar si la imagen tiene canal alfa (transparencia)
+    has_alpha = img.mode == 'RGBA' or 'A' in img.getbands()
+    
     # Aplicar relación de aspecto si se especifica
     if aspect_ratio is not None:
         img = apply_aspect_ratio(img, aspect_ratio, aspect_method)
@@ -87,24 +103,67 @@ def retro_effect(input_path, output_path=None, width=None, height=None, color_de
     if width and height:
         img = img.resize((width, height), Image.LANCZOS)
     
-    # Aplicar reducción de colores
-    img = img.convert('P', palette=Image.ADAPTIVE, colors=color_depth)
-    img = img.convert('RGB')
-    
-    # Pixelado
-    pixel_width = img.width // pixel_size
-    pixel_height = img.height // pixel_size
-    img = img.resize((pixel_width, pixel_height), Image.NEAREST)
-    img = img.resize((img.width * pixel_size, img.height * pixel_size), Image.NEAREST)
+    # Aplicar reducción de colores preservando canal alfa si existe
+    if has_alpha:
+        # Separar canales RGB y Alpha
+        rgb = img.convert('RGB')
+        alpha = img.split()[-1]
+        
+        # Reducir colores en RGB
+        rgb = rgb.convert('P', palette=Image.ADAPTIVE, colors=color_depth)
+        rgb = rgb.convert('RGB')
+        
+        # Pixelado a RGB
+        pixel_width = rgb.width // pixel_size
+        pixel_height = rgb.height // pixel_size
+        rgb = rgb.resize((pixel_width, pixel_height), Image.NEAREST)
+        rgb = rgb.resize((rgb.width * pixel_size, rgb.height * pixel_size), Image.NEAREST)
+        
+        # Pixelado al canal alpha
+        alpha = alpha.resize((pixel_width, pixel_height), Image.NEAREST)
+        alpha = alpha.resize((rgb.width, rgb.height), Image.NEAREST)
+        
+        # Aplicar ruido solo a canales RGB
+        np_rgb = np.array(rgb)
+        noise = np.random.randint(0, 15, np_rgb.shape)
+        np_rgb = np.clip(np_rgb + noise, 0, 255).astype(np.uint8)
+        rgb_with_noise = Image.fromarray(np_rgb)
+        
+        # Recombinar RGB y Alpha
+        final_img = rgb_with_noise.convert('RGBA')
+        final_img.putalpha(alpha)
+    else:
+        # Aplicar reducción de colores
+        img = img.convert('P', palette=Image.ADAPTIVE, colors=color_depth)
+        img = img.convert('RGB')
+        
+        # Pixelado
+        pixel_width = img.width // pixel_size
+        pixel_height = img.height // pixel_size
+        img = img.resize((pixel_width, pixel_height), Image.NEAREST)
+        img = img.resize((img.width * pixel_size, img.height * pixel_size), Image.NEAREST)
+        
+        # Aplicar ruido/dithering para estética retro
+        np_img = np.array(img)
+        noise = np.random.randint(0, 15, np_img.shape)
+        np_img = np.clip(np_img + noise, 0, 255).astype(np.uint8)
+        
+        final_img = Image.fromarray(np_img)
     
     # Opcional: añadir cuadro de diálogo estilo retro
     if add_dialog and dialog_text:
-        dialog_height = pixel_size * 10
-        canvas = Image.new('RGB', (img.width, img.height + dialog_height), (50, 50, 50))
-        canvas.paste(img, (0, 0))
+        # Crear nuevo canvas con o sin alpha según corresponda
+        if has_alpha:
+            dialog_height = pixel_size * 10
+            canvas = Image.new('RGBA', (final_img.width, final_img.height + dialog_height), (50, 50, 50, 255))
+            canvas.paste(final_img, (0, 0), final_img if has_alpha else None)
+        else:
+            dialog_height = pixel_size * 10
+            canvas = Image.new('RGB', (final_img.width, final_img.height + dialog_height), (50, 50, 50))
+            canvas.paste(final_img, (0, 0))
         
         draw = ImageDraw.Draw(canvas)
-        dialog_box = (10, img.height + 5, img.width - 10, img.height + dialog_height - 5)
+        dialog_box = (10, final_img.height + 5, final_img.width - 10, final_img.height + dialog_height - 5)
         draw.rectangle(dialog_box, fill=(80, 80, 80), outline=(200, 200, 200))
         
         try:
@@ -115,21 +174,47 @@ def retro_effect(input_path, output_path=None, width=None, height=None, color_de
         text_pos = (dialog_box[0] + 10, dialog_box[1] + 10)
         draw.text(text_pos, dialog_text, fill=(0, 0, 200), font=font)
         
-        img = canvas
+        final_img = canvas
     
-    # Añadir ruido/dithering para estética retro
-    np_img = np.array(img)
-    noise = np.random.randint(0, 15, np_img.shape)
-    np_img = np.clip(np_img + noise, 0, 255).astype(np.uint8)
+    # Guardar imagen respetando el formato original y aplicando la calidad
+    lower_path = output_path.lower()
     
-    final_img = Image.fromarray(np_img)
-    final_img.save(output_path)
+    # Determinar opciones de guardado según el formato
+    save_options = {}
+    
+    # Aplicar calidad para formatos que la soportan
+    if lower_path.endswith('.jpg') or lower_path.endswith('.jpeg'):
+        save_options['quality'] = quality
+        save_options['format'] = 'JPEG'
+        save_options['optimize'] = True
+    elif lower_path.endswith('.png'):
+        save_options['format'] = 'PNG'
+        # El parámetro optimize reduce el tamaño del archivo
+        save_options['optimize'] = True
+        # Valor de compresión entre 0-9 (0 sin compresión, 9 máxima compresión)
+        # Convertir quality de escala 1-100 a escala 0-9
+        compression_level = min(9, max(0, 9 - int(quality / 11)))
+        save_options['compress_level'] = compression_level
+    elif lower_path.endswith('.webp'):
+        save_options['quality'] = quality
+        save_options['format'] = 'WEBP'
+    
+    # Guardar según el tipo de imagen
+    if has_alpha and lower_path.endswith('.png'):
+        final_img.save(output_path, **save_options)
+    else:
+        # Si la imagen tiene alpha pero el formato no lo soporta, convertir a RGB
+        if has_alpha and not lower_path.endswith('.png'):
+            print("Aviso: Se perderá la transparencia al guardar en un formato que no es PNG")
+            final_img = final_img.convert('RGB')
+        final_img.save(output_path, **save_options)
+    
     print(f"Imagen procesada guardada en: {output_path}")
     return final_img
 
 def process_image_directory(input_dir, output_dir=None, width=None, height=None, 
                            color_depth=16, pixel_size=4, add_dialog=False, dialog_text="",
-                           aspect_ratio=None, aspect_method='resize'):
+                           aspect_ratio=None, aspect_method='resize', quality=95):
     """
     Procesa todas las imágenes en un directorio
     """
@@ -170,7 +255,7 @@ def process_image_directory(input_dir, output_dir=None, width=None, height=None,
         retro_effect(
             str(file_path), str(output_file), width, height, 
             color_depth, pixel_size, add_dialog, dialog_text,
-            aspect_ratio, aspect_method
+            aspect_ratio, aspect_method, quality
         )
     
     print(f"\nProceso completo: {len(images)} imágenes convertidas")
@@ -196,6 +281,8 @@ if __name__ == "__main__":
                                help='Relación de aspecto de la imagen de salida')
     parser_single.add_argument('--aspect-method', choices=['resize', 'crop'], default='resize',
                                help='Método para ajustar la relación de aspecto')
+    parser_single.add_argument('--quality', type=int, default=95, 
+                               help='Calidad de la imagen para formatos con compresión (1-100, mayor es mejor)')
     
     # Subparser para procesamiento por lotes
     parser_batch = subparsers.add_parser('batch', help='Procesar múltiples imágenes en un directorio')
@@ -211,6 +298,8 @@ if __name__ == "__main__":
                              help='Relación de aspecto de las imágenes de salida')
     parser_batch.add_argument('--aspect-method', choices=['resize', 'crop'], default='resize',
                              help='Método para ajustar la relación de aspecto')
+    parser_batch.add_argument('--quality', type=int, default=95, 
+                             help='Calidad de la imagen para formatos con compresión (1-100, mayor es mejor)')
     
     args = parser.parse_args()
     
@@ -224,13 +313,13 @@ if __name__ == "__main__":
             retro_effect(
                 args.input, args.output, args.width, args.height, 
                 args.colors, args.pixel_size, args.dialog, args.text,
-                aspect_ratio_value, args.aspect_method
+                aspect_ratio_value, args.aspect_method, args.quality
             )
         elif args.mode == 'batch':
             process_image_directory(
                 args.input_dir, args.output_dir, args.width, args.height,
                 args.colors, args.pixel_size, args.dialog, args.text,
-                aspect_ratio_value, args.aspect_method
+                aspect_ratio_value, args.aspect_method, args.quality
             )
         else:
             parser.print_help()
