@@ -67,7 +67,7 @@ def parse_aspect_ratio(aspect_str):
 
 def retro_effect(input_path, output_path=None, width=None, height=None, color_depth=16, 
                  pixel_size=4, add_dialog=False, dialog_text="", 
-                 aspect_ratio=None, aspect_method='resize', quality=95):
+                 aspect_ratio=None, aspect_method='resize', quality=95, output_format=None):
     """
     Aplica un efecto retro a una imagen individual
     
@@ -83,12 +83,8 @@ def retro_effect(input_path, output_path=None, width=None, height=None, color_de
         aspect_ratio: Relación de aspecto de salida (por defecto: None)
         aspect_method: Método para ajustar relación de aspecto ('resize' o 'crop')
         quality: Calidad de la imagen para formatos con compresión (1-100, por defecto: 95)
+        output_format: Formato de salida ('png', 'jpg', 'webp', o None para usar original)
     """
-    # Configuración de salida por defecto si no se especifica
-    if not output_path:
-        filename, ext = os.path.splitext(input_path)
-        output_path = f"{filename}_retro-c{color_depth}-p{pixel_size}{ext}"
-    
     # Cargar imagen
     img = Image.open(input_path)
     
@@ -176,11 +172,21 @@ def retro_effect(input_path, output_path=None, width=None, height=None, color_de
         
         final_img = canvas
     
-    # Guardar imagen respetando el formato original y aplicando la calidad
-    lower_path = output_path.lower()
+    # Configuración de salida por defecto si no se especifica
+    if not output_path:
+        filename, ext = os.path.splitext(input_path)
+        # Usar formato especificado o mantener el original
+        if output_format:
+            ext = f".{output_format}"
+        output_path = f"{filename}_retro-c{color_depth}-p{pixel_size}{ext}"
+    else:
+        # Si se especifica output_path y output_format, asegurar la extensión correcta
+        if output_format:
+            output_path = str(Path(output_path).with_suffix(f".{output_format}"))
     
     # Determinar opciones de guardado según el formato
     save_options = {}
+    lower_path = output_path.lower()
     
     # Aplicar calidad para formatos que la soportan
     if lower_path.endswith('.jpg') or lower_path.endswith('.jpeg'):
@@ -189,32 +195,29 @@ def retro_effect(input_path, output_path=None, width=None, height=None, color_de
         save_options['optimize'] = True
     elif lower_path.endswith('.png'):
         save_options['format'] = 'PNG'
-        # El parámetro optimize reduce el tamaño del archivo
         save_options['optimize'] = True
-        # Valor de compresión entre 0-9 (0 sin compresión, 9 máxima compresión)
-        # Convertir quality de escala 1-100 a escala 0-9
         compression_level = min(9, max(0, 9 - int(quality / 11)))
         save_options['compress_level'] = compression_level
     elif lower_path.endswith('.webp'):
         save_options['quality'] = quality
         save_options['format'] = 'WEBP'
+        save_options['lossless'] = False
+        if has_alpha:
+            save_options['exact'] = True
     
-    # Guardar según el tipo de imagen
-    if has_alpha and lower_path.endswith('.png'):
-        final_img.save(output_path, **save_options)
-    else:
-        # Si la imagen tiene alpha pero el formato no lo soporta, convertir a RGB
-        if has_alpha and not lower_path.endswith('.png'):
-            print("Aviso: Se perderá la transparencia al guardar en un formato que no es PNG")
-            final_img = final_img.convert('RGB')
-        final_img.save(output_path, **save_options)
+    # Si la imagen tiene alpha pero el formato no lo soporta, convertir a RGB
+    if has_alpha and not (lower_path.endswith('.png') or lower_path.endswith('.webp')):
+        print(f"Aviso: Se perderá la transparencia al guardar en formato {Path(output_path).suffix}")
+        final_img = final_img.convert('RGB')
+    
+    final_img.save(output_path, **save_options)
     
     print(f"Imagen procesada guardada en: {output_path}")
     return final_img
 
 def process_image_directory(input_dir, output_dir=None, width=None, height=None, 
                            color_depth=16, pixel_size=4, add_dialog=False, dialog_text="",
-                           aspect_ratio=None, aspect_method='resize', quality=95):
+                           aspect_ratio=None, aspect_method='resize', quality=95, output_format=None):
     """
     Procesa todas las imágenes en un directorio
     """
@@ -246,8 +249,13 @@ def process_image_directory(input_dir, output_dir=None, width=None, height=None,
     
     # Procesar cada imagen
     for i, file_path in enumerate(images, 1):
-        # Mantener la extensión original
-        output_file = output_path / f"{file_path.stem}_retro-c{color_depth}-p{pixel_size}{file_path.suffix}"
+        # Determinar extensión de salida
+        if output_format:
+            output_extension = f".{output_format}"
+        else:
+            output_extension = file_path.suffix
+        
+        output_file = output_path / f"{file_path.stem}_retro-c{color_depth}-p{pixel_size}{output_extension}"
         
         print(f"Procesando imagen {i}/{len(images)}: {file_path.name}")
         
@@ -255,7 +263,7 @@ def process_image_directory(input_dir, output_dir=None, width=None, height=None,
         retro_effect(
             str(file_path), str(output_file), width, height, 
             color_depth, pixel_size, add_dialog, dialog_text,
-            aspect_ratio, aspect_method, quality
+            aspect_ratio, aspect_method, quality, output_format
         )
     
     print(f"\nProceso completo: {len(images)} imágenes convertidas")
@@ -283,6 +291,8 @@ if __name__ == "__main__":
                                help='Método para ajustar la relación de aspecto')
     parser_single.add_argument('--quality', type=int, default=95, 
                                help='Calidad de la imagen para formatos con compresión (1-100, mayor es mejor)')
+    parser_single.add_argument('--format', choices=['png', 'jpg', 'webp'], 
+                               help='Formato de salida (default: mantener formato original)')
     
     # Subparser para procesamiento por lotes
     parser_batch = subparsers.add_parser('batch', help='Procesar múltiples imágenes en un directorio')
@@ -300,6 +310,8 @@ if __name__ == "__main__":
                              help='Método para ajustar la relación de aspecto')
     parser_batch.add_argument('--quality', type=int, default=95, 
                              help='Calidad de la imagen para formatos con compresión (1-100, mayor es mejor)')
+    parser_batch.add_argument('--format', choices=['png', 'jpg', 'webp'], 
+                             help='Formato de salida (default: mantener formato original)')
     
     args = parser.parse_args()
     
@@ -313,13 +325,13 @@ if __name__ == "__main__":
             retro_effect(
                 args.input, args.output, args.width, args.height, 
                 args.colors, args.pixel_size, args.dialog, args.text,
-                aspect_ratio_value, args.aspect_method, args.quality
+                aspect_ratio_value, args.aspect_method, args.quality, args.format
             )
         elif args.mode == 'batch':
             process_image_directory(
                 args.input_dir, args.output_dir, args.width, args.height,
                 args.colors, args.pixel_size, args.dialog, args.text,
-                aspect_ratio_value, args.aspect_method, args.quality
+                aspect_ratio_value, args.aspect_method, args.quality, args.format
             )
         else:
             parser.print_help()

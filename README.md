@@ -1,247 +1,312 @@
-# PyxelArt
+# Retro Media Processing Tools Suite
 
-Herramienta Python para transformar imágenes y videos modernos en gráficos estilo retro con efectos de videojuegos clásicos.
+A unified command-line interface (CLI) for a comprehensive suite of tools that apply retro effects, remove backgrounds, and process images and videos.
 
-## Características
+## Features
 
-- Pixelado configurable
-- Reducción de paleta de colores
-- Efecto de ruido/dithering
-- Adición opcional de cuadros de diálogo estilo aventura gráfica
-- Redimensionado personalizable
-- Soporte para cambio de relación de aspecto (4:3, 1:1)
-- Procesamiento de imágenes a imágenes
-- Conversión de video a GIF animado
-- Conversión de video a video con efectos retro (preservando audio)
-- Control de calidad y tamaño para videos
-- Procesamiento por lotes de múltiples archivos
+- 🎨 **Interactive Menu System**: Easy-to-use interface for all tools
+- 🖼️ **Image Processing**: Apply retro effects and remove backgrounds from images
+- 🎬 **Video Processing**: Convert videos to retro style or animated GIFs
+- 🎞️ **Frame Extraction**: Extract frames from videos and GIFs
+- 🔄 **Complete Pipeline**: Combine background removal with retro effects
+- 🎯 **Batch Processing**: Process multiple files at once
+- 🌈 **Color-coded Output**: Enhanced readability with ANSI colors
 
-## Requisitos
+## Quick Start
 
-- Python 3.6+
-- Pillow
-- NumPy
-- OpenCV (cv2)
-- imageio
-- tqdm
-- FFmpeg (opcional, para preservar audio en videos)
-
-## Instalación
-
-### 1. Crear un entorno virtual (recomendado)
-
+### Using UV (Fastest method)
 ```bash
-python -m venv venv
-source venv/bin/activate  # En Windows: venv\Scripts\activate
+# Install UV if you haven't already
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone the repository and navigate to it
+cd retro-media-tools
+
+# Create virtual environment and install dependencies
+uv venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+uv pip sync requirements.txt
+
+# Run the main script
+python main.py
 ```
 
-### 2. Instalar dependencias
-
+### Using traditional pip
 ```bash
-# Con pip
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
 pip install -r requirements.txt
 
-# Con uv (más rápido)
+# Run the main script
+python main.py
+```
+
+This launches the interactive menu where you can select from various operations.
+
+## Available Operations
+
+1. **Apply retro effect to image(s)**
+   - Single image or batch processing
+   - Customizable colors, pixelation, and aspect ratios
+   - Support for PNG, JPEG, and WebP formats
+
+2. **Convert video to retro GIF**
+   - Create animated GIFs with retro aesthetics
+   - Frame rate control and frame skipping
+   - Aspect ratio adjustments
+
+3. **Apply retro effect to video**
+   - Preserve audio while applying retro effects
+   - Multiple output formats (MP4, AVI, MOV, MKV)
+   - Quality and compression control
+
+4. **Extract frames from video/GIF**
+   - Extract at specific frame rates
+   - Preserve transparency
+   - Output as PNG or WebP
+
+5. **Remove background from image(s)**
+   - Multiple AI models for different subjects
+   - Alpha matting for better edges
+   - Batch processing support
+
+6. **Remove background from video frames**
+   - Process entire videos frame by frame
+   - Choose output format and quality
+   - Option to keep original frames
+
+7. **Extract audio from video**
+   - Multiple audio formats (MP3, WAV, AAC, FLAC, OGG)
+   - Customizable quality and bitrate
+   - Batch processing support
+
+8. **Complete pipeline (images/video)**
+   - Combine background removal with retro effects
+   - Works for both images and videos
+   - Streamlined workflow for best results
+
+9. **Video processing pipeline**
+   - Extract audio + frames + remove backgrounds
+   - Optional retro effects
+   - Organized project structure
+
+10. **Show help for a specific tool**
+    - Access detailed help for each script
+    - View all available options and parameters
+
+## Requirements
+
+### Python Dependencies
+The project requires the following main libraries:
+- Pillow (image processing)
+- NumPy (numerical operations)
+- OpenCV (video processing)
+- tqdm (progress bars)
+- rembg (background removal)
+- imageio (GIF/video handling)
+
+### System Requirements
+- Python 3.7+
+- FFmpeg (optional, for audio preservation in videos)
+
+## Installation
+
+### Method 1: Using UV (Recommended)
+
+UV is a fast Python package installer and resolver. If you don't have UV installed:
+
+```bash
+# Install UV (on macOS/Linux)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Or using pip
+pip install uv
+```
+
+Then install the project dependencies:
+
+```bash
+# Create a virtual environment with UV
 uv venv
+
+# Activate the virtual environment
+# On macOS/Linux:
 source .venv/bin/activate
+# On Windows:
+.venv\Scripts\activate
+
+# Install dependencies using UV
 uv pip install -r requirements.txt
+
+# Or install specific packages
+uv pip install pillow numpy opencv-python tqdm rembg imageio
 ```
 
-### 3. Instalar FFmpeg (para preservar audio en videos)
-
-**Windows:**
-- Descargar de [ffmpeg.org](https://ffmpeg.org/download.html)
-- Extraer y añadir la carpeta bin al PATH del sistema
-
-**macOS:**
-```bash
-brew install ffmpeg
-```
-
-**Linux:**
-```bash
-sudo apt update && sudo apt install ffmpeg  # Ubuntu/Debian
-sudo dnf install ffmpeg                     # Fedora
-sudo pacman -S ffmpeg                       # Arch Linux
-```
-
-## Uso
-
-### Imágenes (pyxelart.py)
+### Method 2: Using pip
 
 ```bash
-# Procesar una imagen individual
-python pyxelart.py single imagen.jpg
+# Create a virtual environment
+python -m venv venv
 
-# Opciones adicionales
-python pyxelart.py single imagen.jpg --output salida.png --width 320 --height 240 --colors 16 --pixel-size 4 --dialog --text "Texto de ejemplo" --aspect-ratio 4:3 --aspect-method resize
+# Activate the virtual environment
+# On macOS/Linux:
+source venv/bin/activate
+# On Windows:
+venv\Scripts\activate
 
-# Procesar múltiples imágenes
-python pyxelart.py batch carpeta_imagenes --colors 8 --pixel-size 6
+# Install dependencies
+pip install -r requirements.txt
 ```
 
-### Video a GIF (pyxelart_gif.py)
+### Method 3: Using UV with project sync
+
+If you want to use UV's project management features:
 
 ```bash
-# Convertir un video a GIF
-python pyxelart_gif.py single video.mp4
+# Initialize a new project (if needed)
+uv init
 
-# Opciones adicionales
-python pyxelart_gif.py single video.mp4 --output animacion.gif --width 320 --height 240 --colors 16 --pixel-size 4 --frame-skip 2 --fps 10 --dialog --text "Texto animado" --aspect-ratio 1:1 --aspect-method crop
+# Add dependencies to pyproject.toml
+uv add pillow numpy opencv-python tqdm rembg imageio
 
-# Procesar múltiples videos
-python pyxelart_gif.py batch carpeta_videos --colors 16 --fps 12
+# Sync the project
+uv sync
 ```
 
-### Video a Video (pyxelart_video.py)
+### Files needed
 
+Make sure all script files are in the same directory:
+- `main.py`
+- `pyxelart.py`
+- `pyxelart_gif.py`
+- `pyxelart_video.py`
+- `extract_frames.py`
+- `nobg.py`
+- `nobg_video
+
+## Usage Examples
+
+### Interactive Mode
+
+Simply run:
 ```bash
-# Procesar un video manteniendo el formato
-python pyxelart_video.py single video.mp4
-
-# Opciones adicionales
-python pyxelart_video.py single video.mp4 --output video_retro.mp4 --width 640 --height 480 --colors 8 --pixel-size 6 --frame-skip 2 --dialog --text "Texto retro" --format .mp4 --aspect-ratio 4:3 --aspect-method resize --quality 20 --preset medium
-
-# Procesar múltiples videos
-python pyxelart_video.py batch carpeta_videos --colors 16 --quality 23
+python main.py
 ```
 
-## Argumentos comunes
+The interactive menu will guide you through each operation with prompts for all necessary parameters.
 
-| Argumento | Descripción | Por defecto |
-|-----------|-------------|-------------|
-| `--output` | Ruta de salida | *nombre_original*_retro-c{color_depth}-p{pixel_size}.*extensión* |
-| `--width` | Ancho de salida | (original) |
-| `--height` | Alto de salida | (original) |
-| `--colors` | Profundidad de color | 16 |
-| `--pixel-size` | Nivel de pixelado | 4 |
-| `--dialog` | Incluir cuadro de diálogo | False |
-| `--text` | Texto para el cuadro de diálogo | "" |
-| `--aspect-ratio` | Relación de aspecto | "original" (también: "4:3", "1:1") |
-| `--aspect-method` | Método para ajustar aspecto | "resize" (también: "crop") |
+### Example Workflow
 
-## Argumentos específicos para GIF (pyxelart_gif.py)
+1. **Remove background from a video**:
+   - Select option 6
+   - Enter video path
+   - Choose output settings
 
-| Argumento | Descripción | Por defecto |
-|-----------|-------------|-------------|
-| `--frame-skip` | Saltar N frames entre capturas | 2 |
-| `--fps` | Frames por segundo del GIF | 10 |
+2. **Apply retro effect to processed frames**:
+   - Select option 1
+   - Choose batch mode
+   - Point to the frames directory
+   - Set retro parameters
 
-## Argumentos específicos para Video (pyxelart_video.py)
+3. **Or use the complete pipeline (option 7)**:
+   - Automatically handles both steps
+   - Simplified workflow
 
-| Argumento | Descripción | Por defecto |
-|-----------|-------------|-------------|
-| `--frame-skip` | Saltar N frames entre capturas | 1 |
-| `--fps` | Frames por segundo | (original) |
-| `--format` | Formato del video de salida | .mp4 (también: .avi, .mov, .mkv) |
-| `--quality` | Calidad de compresión (1-51) | 23 (menor = mejor calidad) |
-| `--preset` | Preset de codificación | medium |
+## Menu Navigation
 
-## Control de calidad para videos
+- Use number keys (1-11) to select operations
+- Follow the prompts for each parameter
+- Default values are shown in brackets [default]
+- Press Enter to accept default values
+- Use Ctrl+C to cancel current operation
 
-### Valores recomendados para calidad (--quality)
+## Color Coding
 
-| Calidad Deseada | Valor CRF | Tamaño Resultante |
-|-----------------|-----------|-------------------|
-| Alta calidad (casi sin pérdida) | 17-18 | ~60-70% del original |
-| Buena calidad (equilibrada) | 19-23 | ~40-50% del original |
-| Calidad media (ahorro espacio) | 24-28 | ~25-35% del original |
-| Calidad baja (máximo ahorro) | 29-35 | ~15-20% del original |
+The interface uses colors for better readability:
+- 🔵 Blue: Menu options
+- 🟢 Green: Success messages
+- 🔴 Red: Error messages
+- 🟡 Yellow: Warnings
+- 🔷 Cyan: Commands being executed
+- 🟣 Purple: Section headers
 
-### Presets de codificación (--preset)
+## Tips
 
-* **ultrafast**: Mayor velocidad, peor compresión (archivos más grandes)
-* **veryfast/faster**: Buena velocidad, compresión razonable
-* **medium**: Equilibrio predeterminado
-* **slow/slower**: Mejor compresión, menor velocidad
-* **veryslow**: Máxima compresión, velocidad muy lenta
+1. **First-time users**: Start with option 8 to explore help for each tool
+2. **Batch processing**: Use batch modes for processing multiple files efficiently
+3. **Quality settings**: Lower quality values mean better quality (for video compression)
+4. **Aspect ratios**: Use 4:3 for classic retro look, 1:1 for social media
+5. **Background removal**: Use `u2net_human_seg` model for people, `u2net` for general objects
 
-## Relación de aspecto
+## Common Workflows
 
-### Métodos de ajuste:
+### Create Retro Game Sprites
+```
+1. Remove background from character images (option 5)
+2. Apply retro effect with 16 colors and pixel size 4 (option 1)
+3. Extract frames if needed (option 4)
+```
 
-- **resize**: Estira o comprime la imagen para ajustarla a la proporción deseada
-- **crop**: Recorta los bordes de la imagen para lograr la proporción deseada (mantiene el centro)
+### Process Video for Social Media
+```
+1. Convert video to retro GIF (option 2)
+2. Set aspect ratio to 1:1
+3. Use moderate compression for smaller file size
+```
 
-## Ejemplos de uso
+### Full Video Processing
+```
+1. Use complete pipeline (option 8)
+2. Choose video input
+3. Set retro parameters
+4. Get processed frames with transparent background
+```
 
-### Imágenes
-- Crear estilo de aventura gráfica de los 90s:
-  ```bash
-  python pyxelart.py single foto.jpg --colors 16 --pixel-size 4 --dialog --text "She's doing things to you alright, look at those... Legs"
-  ```
+### Game Development Workflow
+```
+1. Use video processing pipeline (option 9)
+2. Extract audio in WAV format for game engine
+3. Extract frames at desired FPS
+4. Remove backgrounds from all frames
+5. Optional: Apply retro effects
+6. Import assets into your game engine
+```
 
-- Estilo 8-bit con alta pixelación:
-  ```bash
-  python pyxelart.py single foto.jpg --colors 8 --pixel-size 8
-  ```
+## Troubleshooting
 
-- Imagen para formato Instagram (1:1):
-  ```bash
-  python pyxelart.py single foto.jpg --aspect-ratio 1:1 --aspect-method crop
-  ```
+### Common Issues:
 
-### Videos a GIF
-- Convertir video a GIF con estilo de 16 colores:
-  ```bash
-  python pyxelart_gif.py single video.mp4 --colors 16 --pixel-size 4
-  ```
+1. **Script not found errors**
+   - Ensure all scripts are in the same directory as main.py
+   - Check file permissions
 
-- GIF de baja calidad pero más rápido de generar:
-  ```bash
-  python pyxelart_gif.py single video.mp4 --frame-skip 5 --fps 8
-  ```
+2. **Import errors**
+   - Install all required dependencies
+   - Use correct Python version (3.7+)
 
-- Clip estilo 4:3 con texto en la parte inferior:
-  ```bash
-  python pyxelart_gif.py single video.mp4 --aspect-ratio 4:3 --dialog --text "Again your searching for..."
-  ```
+3. **FFmpeg warnings**
+   - Install FFmpeg for full video support
+   - Videos will process without audio if FFmpeg is missing
 
-### Videos a Videos Retro
-- Video con calidad alta y buena compresión:
-  ```bash
-  python pyxelart_video.py single video.mp4 --quality 18 --preset medium
-  ```
+4. **Memory errors**
+   - Process smaller batches
+   - Reduce output quality/resolution
+   - Close other applications
 
-- Video con estilo de 8 colores y máximo ahorro de espacio:
-  ```bash
-  python pyxelart_video.py single video.mp4 --colors 8 --quality 28 --preset slow
-  ```
+## Advanced Usage
 
-- Convertir video a AVI con relación 4:3:
-  ```bash
-  python pyxelart_video.py single video.mp4 --format .avi --aspect-ratio 4:3 --dialog --text "Press SPACE to continue..."
-  ```
+The main.py script constructs command-line arguments for each tool. You can:
+- View the generated commands before execution
+- Copy commands for direct use
+- Modify the script for custom workflows
 
-- Procesamiento rápido para pruebas:
-  ```bash
-  python pyxelart_video.py single video.mp4 --quality 23 --preset veryfast
-  ```
+## License
 
-### Procesamiento por lotes
-- Convertir todas las imágenes de una carpeta:
-  ```bash
-  python pyxelart.py batch carpeta_con_fotos
-  ```
+MIT License - Feel free to use and modify as needed.
 
-- Procesar múltiples videos y convertirlos a GIFs:
-  ```bash
-  python pyxelart_gif.py batch videos/ --colors 16 --fps 10
-  ```
+## Credits
 
-- Procesar múltiples videos con compresión óptima:
-  ```bash
-  python pyxelart_video.py batch carpeta_videos --quality 20 --preset slow
-  ```
-
-## Notas
-
-- La carpeta de salida para procesamiento por lotes es `./retro` junto a la carpeta original
-- El método `resize` puede distorsionar la imagen, pero no pierde contenido
-- El método `crop` mantiene las proporciones originales, pero recorta partes de la imagen
-- FFmpeg es necesario para preservar audio en videos procesados
-- Para videos, valores de calidad menores producen mejor calidad visual pero archivos más grandes
-
-## Licencia
-
-MIT
+Retro Media Processing Tools Suite - A unified interface for media processing scripts.
