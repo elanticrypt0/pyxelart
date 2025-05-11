@@ -6,8 +6,8 @@ import shutil
 from pathlib import Path
 
 # Importar funciones de los scripts existentes
-from extract_frames import extract_frames_from_video
-from nobg import process_image_directory
+from video_extract_frames import extract_frames_from_video
+from image_nobg import process_image_directory
 
 def snake_case_filename(filename):
     """Convierte un nombre de archivo a snake_case sin extensión"""
