@@ -1,312 +1,316 @@
-# Retro Media Processing Tools Suite
+# PyxelArt - Herramientas de Procesamiento Retro
 
-A unified command-line interface (CLI) for a comprehensive suite of tools that apply retro effects, remove backgrounds, and process images and videos.
+Una suite modernizada de herramientas para crear efectos retro en imágenes y videos con una arquitectura modular y sin duplicación de código.
 
-## Features
+## 🚀 Instalación Rápida
 
-- 🎨 **Interactive Menu System**: Easy-to-use interface for all tools
-- 🖼️ **Image Processing**: Apply retro effects and remove backgrounds from images
-- 🎬 **Video Processing**: Convert videos to retro style or animated GIFs
-- 🎞️ **Frame Extraction**: Extract frames from videos and GIFs
-- 🔄 **Complete Pipeline**: Combine background removal with retro effects
-- 🎯 **Batch Processing**: Process multiple files at once
-- 🌈 **Color-coded Output**: Enhanced readability with ANSI colors
-
-## Quick Start
-
-### Using UV (Fastest method)
+### Usando UV (Recomendado)
 ```bash
-# Install UV if you haven't already
+# Instalar UV si no lo tienes
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Clone the repository and navigate to it
-cd retro-media-tools
-
-# Create virtual environment and install dependencies
+# Clonar e instalar
+git clone <repo>
+cd pyxelart
 uv venv
-source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-uv pip sync requirements.txt
-
-# Run the main script
-python main.py
-```
-
-### Using traditional pip
-```bash
-# Create and activate virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the main script
-python main.py
-```
-
-This launches the interactive menu where you can select from various operations.
-
-## Available Operations
-
-1. **Apply retro effect to image(s)**
-   - Single image or batch processing
-   - Customizable colors, pixelation, and aspect ratios
-   - Support for PNG, JPEG, and WebP formats
-
-2. **Convert video to retro GIF**
-   - Create animated GIFs with retro aesthetics
-   - Frame rate control and frame skipping
-   - Aspect ratio adjustments
-
-3. **Apply retro effect to video**
-   - Preserve audio while applying retro effects
-   - Multiple output formats (MP4, AVI, MOV, MKV)
-   - Quality and compression control
-
-4. **Extract frames from video/GIF**
-   - Extract at specific frame rates
-   - Preserve transparency
-   - Output as PNG or WebP
-
-5. **Remove background from image(s)**
-   - Multiple AI models for different subjects
-   - Alpha matting for better edges
-   - Batch processing support
-
-6. **Remove background from video frames**
-   - Process entire videos frame by frame
-   - Choose output format and quality
-   - Option to keep original frames
-
-7. **Extract audio from video**
-   - Multiple audio formats (MP3, WAV, AAC, FLAC, OGG)
-   - Customizable quality and bitrate
-   - Batch processing support
-
-8. **Complete pipeline (images/video)**
-   - Combine background removal with retro effects
-   - Works for both images and videos
-   - Streamlined workflow for best results
-
-9. **Video processing pipeline**
-   - Extract audio + frames + remove backgrounds
-   - Optional retro effects
-   - Organized project structure
-
-10. **Show help for a specific tool**
-    - Access detailed help for each script
-    - View all available options and parameters
-
-## Requirements
-
-### Python Dependencies
-The project requires the following main libraries:
-- Pillow (image processing)
-- NumPy (numerical operations)
-- OpenCV (video processing)
-- tqdm (progress bars)
-- rembg (background removal)
-- imageio (GIF/video handling)
-
-### System Requirements
-- Python 3.7+
-- FFmpeg (optional, for audio preservation in videos)
-
-## Installation
-
-### Method 1: Using UV (Recommended)
-
-UV is a fast Python package installer and resolver. If you don't have UV installed:
-
-```bash
-# Install UV (on macOS/Linux)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Or using pip
-pip install uv
-```
-
-Then install the project dependencies:
-
-```bash
-# Create a virtual environment with UV
-uv venv
-
-# Activate the virtual environment
-# On macOS/Linux:
-source .venv/bin/activate
-# On Windows:
-.venv\Scripts\activate
-
-# Install dependencies using UV
+source .venv/bin/activate  # En Windows: .venv\Scripts\activate
 uv pip install -r requirements.txt
-
-# Or install specific packages
-uv pip install pillow numpy opencv-python tqdm rembg imageio
 ```
 
-### Method 2: Using pip
-
+### Usando pip tradicional
 ```bash
-# Create a virtual environment
 python -m venv venv
-
-# Activate the virtual environment
-# On macOS/Linux:
-source venv/bin/activate
-# On Windows:
-venv\Scripts\activate
-
-# Install dependencies
+source venv/bin/activate  # En Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Method 3: Using UV with project sync
+### Scripts de instalación automática
+```bash
+# Linux/macOS
+./install.sh
 
-If you want to use UV's project management features:
+# Windows
+.\install.ps1
+```
+
+## 🛠️ Herramientas Principales
+
+### 1. CLI Unificado - `unified_cli.py` ⭐
+**La herramienta principal que combina múltiples efectos**
 
 ```bash
-# Initialize a new project (if needed)
-uv init
+# Efecto pixel art básico
+python unified_cli.py imagen.jpg --effects pixelart --colors 16 --pixel-size 4
 
-# Add dependencies to pyproject.toml
-uv add pillow numpy opencv-python tqdm rembg imageio
+# Múltiples efectos combinados
+python unified_cli.py imagen.jpg --effects pixelart chromatic dialog --colors 8 --aberration-intensity 1.5
 
-# Sync the project
-uv sync
+# Aplicar efectos a video
+python unified_cli.py video.mp4 --effects pixelart --colors 16 --fps 24 --aspect-ratio 4:3
+
+# Con relación de aspecto personalizada
+python unified_cli.py imagen.jpg --effects pixelart --aspect-ratio 1:1 --aspect-method crop
 ```
 
-### Files needed
+### 2. Procesador de Pixel Art - `pyxelart_refactored.py`
+**Para efectos de pixel art especializados**
 
-Make sure all script files are in the same directory:
-- `main.py`
-- `pyxelart.py`
-- `pyxelart_gif.py`
-- `pyxelart_video.py`
-- `extract_frames.py`
-- `nobg.py`
-- `nobg_video
-
-## Usage Examples
-
-### Interactive Mode
-
-Simply run:
 ```bash
-python main.py
+# Imagen individual
+python pyxelart_refactored.py single imagen.jpg --colors 16 --pixel-size 4 --quality 95
+
+# Con diálogo retro
+python pyxelart_refactored.py single imagen.jpg --dialog --text "GAME OVER" --colors 8
+
+# Procesamiento por lotes
+python pyxelart_refactored.py batch carpeta_imagenes/ --output-dir salida/ --format webp --overwrite
+
+# Con relación de aspecto 4:3 estilo retro
+python pyxelart_refactored.py single imagen.jpg --aspect-ratio 4:3 --aspect-method resize --colors 16
 ```
 
-The interactive menu will guide you through each operation with prompts for all necessary parameters.
+### 3. Aberración Cromática - `chromatic_aberration_refactored.py`
+**Para efectos de aberración cromática específicos**
 
-### Example Workflow
+```bash
+# Aberración básica
+python chromatic_aberration_refactored.py single imagen.jpg --aberration-intensity 1.5
 
-1. **Remove background from a video**:
-   - Select option 6
-   - Enter video path
-   - Choose output settings
+# Con efecto de lente
+python chromatic_aberration_refactored.py single imagen.jpg --aberration-intensity 2.0 --lens-effect
 
-2. **Apply retro effect to processed frames**:
-   - Select option 1
-   - Choose batch mode
-   - Point to the frames directory
-   - Set retro parameters
+# Desplazamientos personalizados
+python chromatic_aberration_refactored.py single imagen.jpg --red-shift 3 0 --blue-shift -3 0 --green-shift 0 1
 
-3. **Or use the complete pipeline (option 7)**:
-   - Automatically handles both steps
-   - Simplified workflow
-
-## Menu Navigation
-
-- Use number keys (1-11) to select operations
-- Follow the prompts for each parameter
-- Default values are shown in brackets [default]
-- Press Enter to accept default values
-- Use Ctrl+C to cancel current operation
-
-## Color Coding
-
-The interface uses colors for better readability:
-- 🔵 Blue: Menu options
-- 🟢 Green: Success messages
-- 🔴 Red: Error messages
-- 🟡 Yellow: Warnings
-- 🔷 Cyan: Commands being executed
-- 🟣 Purple: Section headers
-
-## Tips
-
-1. **First-time users**: Start with option 8 to explore help for each tool
-2. **Batch processing**: Use batch modes for processing multiple files efficiently
-3. **Quality settings**: Lower quality values mean better quality (for video compression)
-4. **Aspect ratios**: Use 4:3 for classic retro look, 1:1 for social media
-5. **Background removal**: Use `u2net_human_seg` model for people, `u2net` for general objects
-
-## Common Workflows
-
-### Create Retro Game Sprites
-```
-1. Remove background from character images (option 5)
-2. Apply retro effect with 16 colors and pixel size 4 (option 1)
-3. Extract frames if needed (option 4)
+# Procesamiento por lotes con alta intensidad
+python chromatic_aberration_refactored.py batch carpeta/ --output-dir salida/ --aberration-intensity 3.0
 ```
 
-### Process Video for Social Media
-```
-1. Convert video to retro GIF (option 2)
-2. Set aspect ratio to 1:1
-3. Use moderate compression for smaller file size
-```
+### 4. Procesador de Video - `video_processor_refactored.py`
+**Para efectos retro en videos**
 
-### Full Video Processing
-```
-1. Use complete pipeline (option 8)
-2. Choose video input
-3. Set retro parameters
-4. Get processed frames with transparent background
-```
+```bash
+# Video con efecto pixel art
+python video_processor_refactored.py single video.mp4 --colors 16 --pixel-size 6 --fps 24
 
-### Game Development Workflow
-```
-1. Use video processing pipeline (option 9)
-2. Extract audio in WAV format for game engine
-3. Extract frames at desired FPS
-4. Remove backgrounds from all frames
-5. Optional: Apply retro effects
-6. Import assets into your game engine
+# Cambiar relación de aspecto a 4:3 retro
+python video_processor_refactored.py single video.mp4 --aspect-ratio 4:3 --video-quality 20 --preset fast
+
+# Procesamiento por lotes de videos
+python video_processor_refactored.py batch carpeta_videos/ --output-dir videos_retro/ --colors 8 --pixel-size 8
 ```
 
-## Troubleshooting
+## 📋 Guía de Parámetros
 
-### Common Issues:
+### Efectos Disponibles
+- `pixelart` - Efecto principal de pixel art con reducción de colores y pixelado
+- `chromatic` - Aberración cromática con desplazamiento de canales RGB
+- `noise` - Ruido gaussiano para textura retro
+- `dialog` - Cuadro de diálogo estilo retro
 
-1. **Script not found errors**
-   - Ensure all scripts are in the same directory as main.py
-   - Check file permissions
+### Parámetros Comunes
 
-2. **Import errors**
-   - Install all required dependencies
-   - Use correct Python version (3.7+)
+#### Pixel Art
+```bash
+--colors 16              # Número de colores (4, 8, 16, 32, 64...)
+--pixel-size 4           # Tamaño del pixelado (1-20)
+--no-noise               # Desactivar ruido
+--noise-intensity 15     # Intensidad del ruido (1-50)
+```
 
-3. **FFmpeg warnings**
-   - Install FFmpeg for full video support
-   - Videos will process without audio if FFmpeg is missing
+#### Relación de Aspecto
+```bash
+--aspect-ratio 4:3       # original, 4:3, 1:1, 16:9
+--aspect-method resize   # resize, crop, pad
+```
 
-4. **Memory errors**
-   - Process smaller batches
-   - Reduce output quality/resolution
-   - Close other applications
+#### Calidad y Formato
+```bash
+--quality 95             # Calidad de salida (1-100)
+--format webp            # png, jpg, webp, mp4, avi
+--optimize-web           # Optimizar para web
+```
 
-## Advanced Usage
+#### Aberración Cromática
+```bash
+--aberration-intensity 1.5  # Intensidad general (0.1-5.0)
+--red-shift 2 0             # Desplazamiento canal rojo (x y)
+--green-shift 0 0           # Desplazamiento canal verde (x y)
+--blue-shift -2 0           # Desplazamiento canal azul (x y)
+--lens-effect               # Activar distorsión de lente
+```
 
-The main.py script constructs command-line arguments for each tool. You can:
-- View the generated commands before execution
-- Copy commands for direct use
-- Modify the script for custom workflows
+#### Video
+```bash
+--fps 24                 # FPS objetivo
+--video-quality 23       # Calidad CRF (0-51, menor = mejor)
+--preset medium          # ultrafast, fast, medium, slow, veryslow
+```
 
-## License
+#### Diálogo Retro
+```bash
+--dialog                 # Activar cuadro de diálogo
+--text "GAME OVER"       # Texto del diálogo
+```
 
-MIT License - Feel free to use and modify as needed.
+## 🎯 Ejemplos Prácticos
 
-## Credits
+### Crear Sprites de Videojuego
+```bash
+# Convertir personaje a sprite retro 16 colores
+python pyxelart_refactored.py single personaje.png --colors 16 --pixel-size 2 --aspect-ratio 1:1 --format png
 
-Retro Media Processing Tools Suite - A unified interface for media processing scripts.
+# Múltiples personajes
+python pyxelart_refactored.py batch personajes/ --output-dir sprites/ --colors 16 --pixel-size 2 --format png
+```
+
+### Efectos de Pantalla CRT
+```bash
+# Simular monitor CRT con aberración cromática
+python unified_cli.py imagen.jpg --effects pixelart chromatic --colors 64 --pixel-size 2 --aberration-intensity 1.0 --aspect-ratio 4:3
+```
+
+### Video Estilo Retro
+```bash
+# Convertir video moderno a estilo 8-bit
+python video_processor_refactored.py single video_moderno.mp4 --colors 8 --pixel-size 6 --fps 15 --aspect-ratio 4:3 --preset fast
+```
+
+### Efectos de Juego Retro
+```bash
+# Pantalla de game over
+python unified_cli.py captura.jpg --effects pixelart dialog --colors 4 --pixel-size 8 --dialog --text "GAME OVER" --aspect-ratio 4:3
+
+# Efecto de daño/error en pantalla
+python chromatic_aberration_refactored.py single pantalla.jpg --aberration-intensity 3.0 --lens-effect --red-shift 5 0 --blue-shift -5 0
+```
+
+### Procesamiento por Lotes Completo
+```bash
+# Procesar toda una carpeta de imágenes con efecto completo
+python unified_cli.py --mode batch carpeta_original/ --output-dir retro_procesado/ --effects pixelart chromatic --colors 16 --aberration-intensity 1.2 --format webp --quality 90 --overwrite
+```
+
+## 🔧 Uso Avanzado
+
+### Combinando Herramientas
+```bash
+# 1. Aplicar pixel art
+python pyxelart_refactored.py single imagen.jpg --output paso1.png --colors 16
+
+# 2. Agregar aberración cromática
+python chromatic_aberration_refactored.py single paso1.png --output final.png --aberration-intensity 1.5
+
+# O todo en uno:
+python unified_cli.py imagen.jpg --effects pixelart chromatic --colors 16 --aberration-intensity 1.5
+```
+
+### Para Desarrollo de Juegos
+```bash
+# Crear tileset retro
+python pyxelart_refactored.py batch tiles_originales/ --output-dir tileset_retro/ --colors 16 --pixel-size 1 --format png
+
+# Procesar UI elements
+python unified_cli.py ui_modern/ --mode batch --output-dir ui_retro/ --effects pixelart --colors 8 --aspect-ratio 1:1
+```
+
+### Para Contenido Social Media
+```bash
+# Instagram (1:1)
+python unified_cli.py foto.jpg --effects pixelart --colors 32 --aspect-ratio 1:1 --aspect-method crop --format jpg --quality 95
+
+# TikTok/YouTube Shorts (9:16)
+python unified_cli.py video.mp4 --effects pixelart --colors 16 --aspect-ratio 9:16 --fps 30 --video-quality 20
+```
+
+## 🚨 Troubleshooting
+
+### FFmpeg requerido para videos
+```bash
+# macOS
+brew install ffmpeg
+
+# Ubuntu/Debian
+sudo apt-get install ffmpeg
+
+# Windows
+# Descargar desde https://ffmpeg.org/download.html
+```
+
+### Problemas de memoria
+```bash
+# Reducir calidad para archivos grandes
+python unified_cli.py video_grande.mp4 --video-quality 30 --preset ultrafast
+
+# Procesar imágenes en lotes más pequeños
+python pyxelart_refactored.py batch carpeta_pequeña/ --colors 8 --pixel-size 4
+```
+
+### Archivos muy grandes
+```bash
+# Optimizar para web
+python unified_cli.py imagen_grande.jpg --effects pixelart --format webp --quality 80 --optimize-web
+```
+
+## 📁 Estructura del Proyecto
+
+```
+pyxelart/
+├── utils/                     # Módulos compartidos
+│   ├── effects_core.py        # Efectos visuales
+│   ├── format_utils.py        # Manejo de formatos
+│   ├── file_utils.py          # Procesamiento de archivos
+│   ├── cli_utils.py           # Utilidades CLI
+│   ├── aspect_ratio_utils.py  # Transformaciones de aspecto
+│   └── ffmpeg_utils.py        # Operaciones FFmpeg
+├── unified_cli.py             # CLI unificado (PRINCIPAL)
+├── pyxelart_refactored.py     # Procesador pixel art
+├── chromatic_aberration_refactored.py  # Aberración cromática
+├── video_processor_refactored.py       # Procesador de video
+├── test/                      # Imágenes de prueba
+├── legacy/                    # Herramientas antiguas (preservadas)
+└── requirements.txt           # Dependencias
+```
+
+## 🎨 Galería de Efectos
+
+### Pixel Art (colors=16, pixel-size=4)
+- Reducción a 16 colores
+- Pixelado x4
+- Ruido retro sutil
+
+### Aberración Cromática (intensity=1.5)
+- Desplazamiento RGB
+- Efecto de monitor CRT
+- Distorsión de lente opcional
+
+### Combinación Completa
+- Pixel art + aberración cromática + diálogo
+- Aspecto 4:3 clásico
+- Optimización de formato
+
+## 🆕 ¿Qué cambió?
+
+### ✅ Eliminada duplicación de código
+- **500+ líneas duplicadas** → **150 líneas** de utilidades
+- **75% menos código repetido**
+- **API consistente** en todas las herramientas
+
+### ✅ Arquitectura modular
+- Efectos centralizados en `utils/effects_core.py`
+- Manejo unificado de formatos
+- CLI reutilizable
+
+### ✅ Herramientas simplificadas
+- **`unified_cli.py`** - Una herramienta para múltiples efectos
+- Herramientas especializadas más focalizadas
+- Mejor rendimiento y mantenibilidad
+
+### ✅ Compatibilidad preservada
+- Las herramientas originales están en `legacy/`
+- Misma funcionalidad, mejor código
+- Migración opcional y gradual
+
+---
+
+**¡Empieza con `unified_cli.py` para la mayoría de casos de uso!**
