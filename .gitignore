@@ -20,3 +20,11 @@ test_*.gif
 
 # OS files
 .DS_Store
+
+# Flask uploads and outputs
+uploads/*
+outputs/*
+!uploads/.gitkeep
+!outputs/.gitkeep
+*.db
+*.sqlite

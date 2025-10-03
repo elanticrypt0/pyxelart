@@ -1,0 +1,22 @@
+{
+  "name": "CRT Monitor",
+  "version": "1.0",
+  "created_at": "2025-10-03T06:00:00",
+  "description": "Simulate old CRT monitor with chromatic aberration and scanlines",
+  "effects": [
+    "pixelart",
+    "chromatic",
+    "glitch_scanlines"
+  ],
+  "params": {
+    "colors": 64,
+    "pixel_size": 2,
+    "aberration_intensity": 1.0,
+    "scanline_intensity": 0.15,
+    "add_noise": true
+  },
+  "output": {
+    "format": "png",
+    "quality": 90
+  }
+}
