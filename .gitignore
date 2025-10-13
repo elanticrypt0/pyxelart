@@ -1,6 +1,7 @@
-.venv
-test-videos
-videotest
+# Virtual environment
+.venv/
+venv/
+env/
 
 # IDE files
 .idea/
@@ -10,21 +11,47 @@ videotest
 __pycache__/
 *.py[cod]
 *$py.class
+*.pyc
+
+# Test directories and files
+test/
+tests/
+test-videos/
+videotest/
+videostest/
+muestras/
+mynegatives/
 
 # Test output files
 test_*.png
 test_*.jpg
+test_*.jpeg
 test_*.webp
 test_*.mp4
 test_*.gif
+test_web_ui.py
 
 # OS files
 .DS_Store
+Thumbs.db
 
 # Flask uploads and outputs
 uploads/*
 outputs/*
 !uploads/.gitkeep
 !outputs/.gitkeep
+presets/*.json
+!presets/.gitkeep
+
+# Database files
 *.db
 *.sqlite
+
+# Environment variables
+.env
+
+# Docker
+.dockerignore
+
+# Lock files
+uv.lock

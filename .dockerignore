@@ -1,0 +1,70 @@
+# Git
+.git
+.gitignore
+
+# Virtual environment
+.venv/
+venv/
+env/
+
+# IDE files
+.idea/
+.vscode/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+
+# Test directories and files
+test/
+tests/
+test-videos/
+videotest/
+videostest/
+muestras/
+mynegatives/
+
+# Test output files
+test_*.png
+test_*.jpg
+test_*.jpeg
+test_*.webp
+test_*.mp4
+test_*.gif
+test_web_ui.py
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation (not needed in container)
+*.md
+CLAUDE.md
+
+# Legacy code (not needed for web app)
+legacy/
+
+# CLI tools (not needed for web app)
+unified_cli.py
+pyxelart_refactored.py
+chromatic_aberration_refactored.py
+video_processor_refactored.py
+install.sh
+install.ps1
+
+# Lock files
+uv.lock
+
+# Environment
+.env
+
+# Project config
+pyproject.toml
+project.toml

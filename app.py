@@ -4,7 +4,7 @@ PyxelArt Flask API
 REST API for applying retro effects to images and videos
 """
 
-from flask import Flask, request, send_file, jsonify, render_template, send_from_directory
+from flask import Flask, request, send_file, jsonify, render_template
 from werkzeug.utils import secure_filename
 from PIL import Image
 import io
@@ -66,7 +66,7 @@ def encode_image_to_base64(img, format='PNG'):
     img.save(buffer, format=format)
     buffer.seek(0)
     img_base64 = base64.b64encode(buffer.read()).decode('utf-8')
-    return f"data:image/{format.lower()};base64,{img_base64}"
+    return img_base64  # Return only base64, not data URL
 
 
 def apply_effects_to_image(img, effects_config):
@@ -168,18 +168,8 @@ def apply_effects_to_image(img, effects_config):
 
 @app.route('/')
 def index():
-    """Serve main page"""
-    return jsonify({
-        'message': 'PyxelArt API',
-        'version': '1.0.0',
-        'endpoints': {
-            'preview': '/api/preview',
-            'apply_effects': '/api/apply-effects',
-            'export': '/api/export',
-            'presets': '/api/presets',
-            'effects': '/api/effects'
-        }
-    })
+    """Serve main web interface"""
+    return render_template('index.html')
 
 
 @app.route('/health')
@@ -612,8 +602,11 @@ def batch_process():
                         **preset.get('params', {})
                     }
         else:
-            # Use provided config
-            preset_config = data.get('config', {})
+            # Use provided config directly from request
+            preset_config = {
+                'effects': data.get('effects', []),
+                **{k: v for k, v in data.items() if k not in ['images', 'preset_id']}
+            }
 
         # Process all images
         results = []
@@ -659,7 +652,11 @@ def internal_error(e):
 # ============================================================================
 
 if __name__ == '__main__':
-    print("🎨 PyxelArt API Server")
-    print("📡 Starting on http://localhost:5000")
-    print("📚 API endpoints available at /")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Get port from environment variable or use default
+    port = int(os.getenv('PORT', 5001))
+
+    print("🎨 PyxelArt Web Application")
+    print(f"📡 Server: http://localhost:{port}")
+    print(f"🌐 Web UI: http://localhost:{port}")
+    print("📚 API Docs: See API_REST.md")
+    app.run(debug=True, host='0.0.0.0', port=port)
